@@ -19,20 +19,86 @@ Aplicación web educativa para el proyecto final de **Física II**. Reúne un te
 
 ## Requisitos
 
-- Node.js 18 o superior
-- pnpm (o npm)
+- [Git](https://git-scm.com/downloads)
+- [Node.js](https://nodejs.org/) 18 o superior (recomendado: versión LTS)
+- **pnpm 11.25.0**. Usa siempre pnpm, no npm: npm ignora el `pnpm-lock.yaml` e instala versiones distintas.
 
-## Cómo ejecutarlo
+Para comprobar lo que tienes instalado:
 
 ```bash
-pnpm install      # instala dependencias
+git --version
+node --version
+pnpm --version
+```
+
+## Instalación (primera vez)
+
+**1. Instalar la versión correcta de pnpm**
+
+```bash
+npm install -g pnpm@11.25.0
+```
+
+**2. Clonar el repositorio**
+
+Desde la terminal:
+
+```bash
+git clone https://github.com/Fern0203/laboratorio-virtual-fisica2.git
+cd laboratorio-virtual-fisica2
+```
+
+O con GitHub Desktop: **File → Clone repository** → `Fern0203/laboratorio-virtual-fisica2` → **Clone** → **Repository → Open in Visual Studio Code**.
+
+**3. Instalar las dependencias**
+
+```bash
+pnpm install --frozen-lockfile
+```
+
+`--frozen-lockfile` instala exactamente las versiones del `pnpm-lock.yaml`, para que todo el equipo tenga lo mismo.
+
+**4. Abrir la aplicación**
+
+```bash
+pnpm dev
+```
+
+Abre en el navegador: http://localhost:5173
+
+## Comandos disponibles
+
+```bash
 pnpm dev          # modo desarrollo en http://localhost:5173
 pnpm test         # corre las 14 pruebas de la lógica física
 pnpm build        # genera la versión de producción en dist/
 pnpm preview      # sirve dist/ para revisarla
 ```
 
-Con npm: `npm install`, `npm run dev`, `npm test`, `npm run build`.
+## Trabajo en equipo
+
+- **Antes de empezar:** `git pull` (o **Fetch origin → Pull origin** en GitHub Desktop).
+- **Al terminar:** `git add .` → `git commit -m "qué cambiaste"` → `git push` (o **Commit to main → Push origin**).
+- Si agregas una librería con `pnpm add`, sube también el `pnpm-lock.yaml` actualizado.
+- No subas `node_modules` ni `dist`; el `.gitignore` ya los excluye.
+
+## Solución de problemas
+
+**`ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION`**
+pnpm bloquea paquetes publicados hace menos de un día. Asegúrate de usar pnpm 11.25.0 y `pnpm install --frozen-lockfile`. Si aun así aparece, borra el lockfile y vuelve a instalar:
+
+```bash
+rm pnpm-lock.yaml
+pnpm install
+```
+
+Después avisa al equipo y sube el nuevo `pnpm-lock.yaml`.
+
+**`pnpm: command not found`**
+Vuelve a instalarlo con `npm install -g pnpm@11.25.0` y cierra y abre la terminal.
+
+**El puerto 5173 está ocupado**
+Vite usará otro puerto (5174, 5175…). Revisa la dirección que aparece en la terminal.
 
 ## Estructura
 
