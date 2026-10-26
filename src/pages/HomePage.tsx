@@ -1,104 +1,91 @@
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Tex } from '../components/ui'
-import { usePalette } from '../hooks/usePalette'
+import { TopicCard } from '../components/TopicCard'
+import { buscarTemas, MODULOS, TEMAS } from '../data/temas'
 
-const MODULOS = [
-  { to: '/coulomb', dot: 'var(--pos)', tag: 'Módulo 1 · Electrostática', titulo: 'Ley de Coulomb', tex: 'F=k\\frac{|q_1q_2|}{r^2}', texto: 'Fuerza entre dos cargas y campo eléctrico. Simulador con gráfica de F contra r.', cta: 'Abrir simulador', ejemplo: '3 µC y −8 µC a 2 m', valor: '54 mN' },
-  { to: '/capacitores', dot: 'var(--copper)', tag: 'Módulo 2 · Potencial y capacitancia', titulo: 'Capacitores', tex: 'C=\\frac{Q}{V}', texto: 'Capacitancia equivalente en serie y paralelo, carga, voltaje y energía. Gráfica de Q contra V.', cta: 'Abrir calculadora', ejemplo: '2 µF + 4 µF en serie, 120 V', valor: '1.333 µF' },
-  { to: '/circuitos', dot: 'var(--teal)', tag: 'Módulo 3 · Corriente eléctrica', titulo: 'Ley de Ohm', tex: 'V=IR', texto: 'Resistencia equivalente, corriente, voltajes y potencia de cada elemento. Gráfica de V contra I.', cta: 'Abrir calculadora', ejemplo: '500 Ω ∥ 700 Ω, 12 V', valor: '291.7 Ω' },
-]
+const SUGERENCIAS = ['Coulomb', 'Gauss', 'capacitores', 'Ohm', 'magnético', 'Módulo 2']
 
 export default function HomePage() {
+  const [consulta, setConsulta] = useState('')
+  const resultados = useMemo(() => buscarTemas(consulta), [consulta])
+  const buscando = consulta.trim() !== ''
+  const totalEjercicios = TEMAS.reduce((s, t) => s + t.ejercicios.length, 0)
+
   return (
     <>
       <div className="band">
         <section className="wrap hero">
-          <span className="badge"><i>II</i>Proyecto final de Física II · Electricidad y magnetismo</span>
-          <h1>Experimenta con la <em>electricidad</em> desde tu navegador</h1>
-          <p className="lead">Tres temas clave del curso, uno por módulo, con teoría, simulador, calculadoras que validan tus datos, gráficas y preguntas de repaso.</p>
-          <div className="hero-actions">
-            <Link to="/coulomb" className="btn primary">Empezar por el Módulo 1</Link>
-            <Link to="/acerca" className="btn">Cómo se hizo</Link>
+          <h1>Proyecto Final · <em>Física II</em></h1>
+          <p className="lead">Todos los temas del curso explicados paso a paso, con ejercicios resueltos por tema, las mejores herramientas para practicar y una calculadora de circuitos con gráfica.</p>
+
+          <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <label htmlFor="buscador" className="sr-only">Buscar un tema o módulo</label>
+            <input
+              id="buscador" type="search" autoComplete="off" placeholder="Busca un tema o módulo: Gauss, capacitores, Módulo 3…"
+              value={consulta} onChange={(e) => setConsulta(e.target.value)}
+            />
+            {buscando && <button type="button" className="clear" aria-label="Borrar búsqueda" onClick={() => setConsulta('')}>✕</button>}
+          </form>
+          <div className="suggest">
+            <span>Prueba:</span>
+            {SUGERENCIAS.map((s) => <button key={s} type="button" onClick={() => setConsulta(s)}>{s}</button>)}
+          </div>
+
+          <div className="hero-stats">
+            <div><b>3</b><span>módulos</span></div>
+            <div><b>{TEMAS.length}</b><span>temas</span></div>
+            <div><b>{totalEjercicios}</b><span>ejercicios resueltos</span></div>
+            <div><b>1</b><span>calculadora con gráfica</span></div>
           </div>
         </section>
-        <div style={{ height: 40 }} />
+        <div style={{ height: 32 }} />
       </div>
 
-      <div className="wrap showcase">
-        <div className="showcase-card">
-          <div className="showcase-pane">
-            <div className="pane-title">Líneas de campo de un dipolo <span>F = k|q₁q₂|/r²</span></div>
-            <FieldLines />
-          </div>
-          <div className="showcase-pane">
-            <div className="pane-title">Ejemplos del curso, ya resueltos <span>3 módulos</span></div>
-            <div className="mini-list">
-              {MODULOS.map((m) => (
-                <Link key={m.to} to={m.to} className="mini">
-                  <div><b><i className="dot" style={{ background: m.dot }} />{m.titulo}</b><small>{m.ejemplo}</small></div>
-                  <span className="val">{m.valor}</span>
-                </Link>
-              ))}
+      <div className="wrap" id="temas">
+        {buscando ? (
+          <section className="section" aria-live="polite">
+            <div className="results-head">
+              <h2>{resultados.length === 0 ? 'Sin resultados' : `${resultados.length} ${resultados.length === 1 ? 'tema encontrado' : 'temas encontrados'}`}</h2>
+              <p className="muted">para “{consulta}”</p>
             </div>
-            <div className="stats">
-              <div><b>3</b><span>calculadoras</span></div>
-              <div><b>15</b><span>preguntas</span></div>
-              <div><b>14</b><span>pruebas</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
+            {resultados.length === 0 ? (
+              <div className="empty">
+                <p>No encontramos temas con esa búsqueda. Prueba con otra palabra, por ejemplo <b>campo</b>, <b>potencial</b> o <b>corriente</b>.</p>
+                <button type="button" className="btn" onClick={() => setConsulta('')}>Ver todos los temas</button>
+              </div>
+            ) : (
+              <div className="topic-grid">{resultados.map((t) => <TopicCard key={t.slug} tema={t} />)}</div>
+            )}
+          </section>
+        ) : (
+          MODULOS.map((m) => (
+            <section className="section module-block" key={m.n} aria-labelledby={`mod-${m.n}`}>
+              <div className="module-head">
+                <div>
+                  <span className="tag"><i className="dot" style={{ background: m.color }} />Módulo {m.n}</span>
+                  <h2 id={`mod-${m.n}`}>{m.nombre}</h2>
+                  <p className="muted">{m.descripcion}</p>
+                </div>
+                <Link to={`/modulo/${m.n}`} className="btn sm">Ver módulo</Link>
+              </div>
+              <div className="topic-grid">{TEMAS.filter((t) => t.modulo === m.n).map((t) => <TopicCard key={t.slug} tema={t} />)}</div>
+            </section>
+          ))
+        )}
 
-      <section className="wrap section">
-        <div className="section-head">
-          <h2>Un tema por módulo</h2>
-          <p>Elegimos el tema que sostiene a los demás en cada módulo del curso. Cada uno trae su propia herramienta interactiva.</p>
-        </div>
-        <div className="modules">
-          {MODULOS.map((m) => (
-            <Link key={m.to} to={m.to} className="module-card">
-              <span className="tag"><i className="dot" style={{ background: m.dot }} />{m.tag}</span>
-              <h3>{m.titulo}</h3>
-              <span className="formula-chip"><Tex>{m.tex}</Tex></span>
-              <p>{m.texto}</p>
-              <span className="go">{m.cta} →</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+        <section className="section">
+          <Link to="/calculadora" className="calc-banner">
+            <div>
+              <span className="tag"><i className="dot" style={{ background: 'var(--teal)' }} />Calculadora propia · Módulo 3</span>
+              <h2>Calculadora de circuitos con gráfica</h2>
+              <p>Ingresa las resistencias y el voltaje: obtén la resistencia equivalente, la corriente, el voltaje y la potencia de cada elemento, con procedimiento paso a paso y gráfica de voltaje contra corriente.</p>
+            </div>
+            <span className="btn primary">Abrir calculadora →</span>
+          </Link>
+        </section>
+        <div style={{ height: 80 }} />
+      </div>
     </>
-  )
-}
-
-/** Líneas de campo de un dipolo, calculadas numéricamente con la Ley de Coulomb. */
-function FieldLines() {
-  const p = usePalette()
-  const W = 460, H = 280
-  const cargas = [{ x: 150, y: 140, q: 1 }, { x: 310, y: 140, q: -1 }]
-  const lineas: string[] = []
-  const N = 16
-  for (let k = 0; k < N; k++) {
-    const a = (2 * Math.PI * k) / N
-    let x = cargas[0].x + 10 * Math.cos(a), y = cargas[0].y + 10 * Math.sin(a)
-    let d = `M${x.toFixed(1)} ${y.toFixed(1)}`
-    for (let s = 0; s < 900; s++) {
-      let ex = 0, ey = 0
-      for (const c of cargas) { const dx = x - c.x, dy = y - c.y, r2 = dx * dx + dy * dy, r3 = r2 * Math.sqrt(r2); ex += (c.q * dx) / r3; ey += (c.q * dy) / r3 }
-      const m = Math.hypot(ex, ey); x += (ex / m) * 2.5; y += (ey / m) * 2.5
-      d += `L${x.toFixed(1)} ${y.toFixed(1)}`
-      if (Math.hypot(x - cargas[1].x, y - cargas[1].y) < 10 || x < -40 || x > W + 40 || y < -40 || y > H + 40) break
-    }
-    lineas.push(d)
-  }
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Líneas de campo eléctrico entre una carga positiva y una negativa">
-      {lineas.map((d, i) => <path key={i} d={d} fill="none" stroke={p.accent} strokeOpacity={0.45} strokeWidth={1.5} />)}
-      {cargas.map((c) => (
-        <g key={c.x}>
-          <circle cx={c.x} cy={c.y} r={20} fill={c.q > 0 ? p.pos : p.neg} />
-          <text x={c.x} y={c.y + 8} textAnchor="middle" fontSize={24} fontWeight={600} fill="#fff">{c.q > 0 ? '+' : '−'}</text>
-        </g>
-      ))}
-    </svg>
   )
 }
